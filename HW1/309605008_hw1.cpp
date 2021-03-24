@@ -129,6 +129,7 @@ int main(int argc, char *argv[]){
         students[i].admission.push_back(companys[j]);
       }
     }
+    students[i].make_decision();
   }
 
 
@@ -141,10 +142,10 @@ int main(int argc, char *argv[]){
   //   cout << endl;
   // }
 
-  for(int i=0;i<students.size();i++){
-    // cout << "student " << students[i].id << ": ";
-    students[i].make_decision();
-  }
+  // for(int i=0;i<students.size();i++){
+  //   // cout << "student " << students[i].id << ": ";
+  //   students[i].make_decision();
+  // }
 
 
   int N = students.size();
