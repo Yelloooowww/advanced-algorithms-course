@@ -75,7 +75,6 @@ public:
 
   void make_decision(){
     if(admission.size() == 0){
-      // cout << "NO CHOOSE" << endl;
       choose = 0;
       return;
     }
@@ -88,7 +87,6 @@ public:
 
     find_max(salary_array, 0, N-1, max, max_index);
     choose = admission[max_index].id;
-    // cout << "choose=" << choose << " $$$=" << admission[max_index].salary << endl;
     return;
   }
 };
@@ -133,21 +131,6 @@ int main(int argc, char *argv[]){
   }
 
 
-  // for(int i=0;i<students.size();i++){
-  //   cout << "student " << students[i].id << ": ";
-  //   for(int j=0;j<students[i].admission.size();j++){
-  //     cout << students[i].admission[j].id << ",";
-  //   }
-  //   if(students[i].admission.size()==0) cout << "No offer ";
-  //   cout << endl;
-  // }
-
-  // for(int i=0;i<students.size();i++){
-  //   // cout << "student " << students[i].id << ": ";
-  //   students[i].make_decision();
-  // }
-
-
   int N = students.size();
   pair<int,int>  student_array[N];
   for(int i=0;i<N;i++){
@@ -159,7 +142,6 @@ int main(int argc, char *argv[]){
 
   ofstream outfile (output_file.c_str());
   for(int i=0;i<N;i++){
-    // cout << array[i].first << ":" << array[i].second <<endl;
     outfile << array[i].first << ": " << array[i].second <<endl;
   }
   outfile.close();
