@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdlib>
 #include <fstream>
 #include <vector>
 using namespace std;
@@ -29,7 +30,7 @@ void find_max(int arr[], int low, int high, int &max ,int &max_index){
 }
 
 const pair<int,int> Max = make_pair(2147483647,0);
-void Merge(vector<pair<int,int>> &Array, int front, int mid, int end){
+void Merge(vector<pair<int,int> > &Array, int front, int mid, int end){
     vector< pair<int,int> > LeftSub(Array.begin()+front, Array.begin() + mid + 1);
     vector< pair<int,int> > RightSub(Array.begin()+mid+1, Array.begin() + end + 1);
     LeftSub.insert(LeftSub.end(), Max);
@@ -105,7 +106,7 @@ int main(int argc, char *argv[]){
 
   // read company data
   vector<company> companys;
-  ifstream infile0(company_file);
+  ifstream infile0(company_file.c_str());
   while(!infile0.eof()){
     company tmp;
     infile0 >> tmp.id >> tmp.conduct_threshold >> tmp.grade_threshold >> tmp.salary;
@@ -114,7 +115,7 @@ int main(int argc, char *argv[]){
 
   // read student data
   vector<student> students;
-  ifstream infile1(student_file);
+  ifstream infile1(student_file.c_str());
   while(!infile1.eof()){
     student tmp;
     infile1 >> tmp.id >> tmp.conduct >> tmp.grade;
@@ -155,10 +156,10 @@ int main(int argc, char *argv[]){
   vector< pair<int,int> > array(student_array, student_array+N);
   MergeSort(array, 0, N-1);
 
-  ofstream outfile (output_file);
+  ofstream outfile (output_file.c_str());
   for(int i=0;i<N;i++){
     // cout << array[i].first << ":" << array[i].second <<endl;
-    outfile << array[i].first << ":" << array[i].second <<endl;
+    outfile << array[i].first << ": " << array[i].second <<endl;
   }
   outfile.close();
 
