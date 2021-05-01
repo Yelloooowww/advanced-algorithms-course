@@ -1,35 +1,77 @@
-//
-// RBT_Insert_Delete.cpp
-// C++ code, harshly and successfully compiled by g++
-//
-
 #include <iostream>
 #include <string>
+#include <sstream>
 
-using std::string;
-using std::cout;
-using std::endl;
+using namespace std;
 
 class RBT;
+class TreeNode;
+class Key{
+private:
+  float value;
+  int ID;
+  friend class TreeNode;
+  friend class RBT;
+public:
+  // Key():value(0),ID(0){}
+  Key(float a,int b):value(a),ID(b){}
+
+  float GetValue() const{return value;};
+  int GetID() const{return ID;};
+
+  friend bool operator< (const Key& foo,const Key& bar){
+    if (foo.GetValue() != bar.GetValue() ){
+      return (foo.GetValue() < bar.GetValue() );
+    }else{
+      return (foo.GetID() > bar.GetID() );
+    }
+  }
+
+  friend bool operator> (const Key& foo,const Key& bar){
+    if (foo.GetValue() != bar.GetValue() ){
+      return (foo.GetValue() > bar.GetValue() );
+    }else{
+      return (foo.GetID() < bar.GetID() );
+    }
+  }
+
+  friend bool operator!= (const Key& foo,const Key& bar){
+    if (foo.GetValue() != bar.GetValue() ){
+      return 1;
+    }else{
+      return ( foo.GetID() != bar.GetID() );
+    }
+  }
+
+  friend ostream& operator<< (ostream& out, const Key& foo){
+    if ((foo.GetID()== -1) & (foo.GetValue() == -1)){
+      return out<<"";
+    }
+    return out<<"(ID="<<foo.GetID()<<", Value="<<foo.GetValue()<<")";
+  }
+};
+
 class TreeNode{
 private:
     TreeNode *leftchild;
     TreeNode *rightchild;
     TreeNode *parent;
-    int key;
-    string element;
+    Key key;
     int color;             // for color: 0: Red, 1: Black
-    friend class RBT;
+    friend class RBT; //使類別A可以存取類別B放在private區域的類別成員。
 public:
-    TreeNode():leftchild(0),rightchild(0),parent(0),key(0),element(""),color(0){}
-    TreeNode(int key, string str = ""):leftchild(0),rightchild(0),parent(0),key(key),element(str),color(0){}
+    // TreeNode():leftchild(0),rightchild(0),parent(0),key(Key(0,0)),color(0){}
+    TreeNode(Key key):key(key),color(0){
+      rightchild = NULL ;
+      leftchild = NULL ;
+      parent = NULL ;
+    }
 
-    int GetKey() const{return key;};
-    string GetElement() const{return element;};
+    Key GetKey() const{return key;};
 };
 
 class RBT{
-private:
+public:
     TreeNode *root;
     TreeNode *neel;
 
@@ -39,39 +81,46 @@ private:
     void DeleteFixedUpRBT(TreeNode *current);
     TreeNode* Successor(TreeNode *current);       // called by DeleteRBT()
     TreeNode* Leftmost(TreeNode *current);        // called by Successor()
-public:
-    RBT(){
-        neel = new TreeNode;    // neel 需要配置記憶體
+
+    RBT(Key k){
+        neel = new TreeNode(k);    // neel 需要配置記憶體
         neel->color = 1;        // neel 是黑色
         root = neel;            // 為了insert, 要把root 初始化成neel
         root->parent = neel;
-    };
+    }
 
-    void InsertRBT(int key, string str);
-    void DeleteRBT(int KEY);
+    void InsertRBT(Key key);
+    void DeleteRBT(Key KEY);
 
-    TreeNode* Search(int KEY);   // called by DeleteRBT()
+    TreeNode* Search(Key KEY);   // called by DeleteRBT()
+    void Inorder(TreeNode *current);
 
 };
 
-void RBT::DeleteRBT(int KEY){              // 要刪除具有KEY的node
-
+void RBT::DeleteRBT(Key KEY){              // 要刪除具有KEY的node
+  cout<<"start del"<<endl;
     TreeNode *delete_node = Search(KEY);   // 先確認RBT中是否存在具有KEY的node
     if (delete_node == NULL) {
         std::cout << "data not found.\n";
         return;
     }
 
-    TreeNode *y = 0;     // 真正要被刪除並釋放記憶體的node
-    TreeNode *x = 0;     // 要被刪除的node的"child"
+    TreeNode *y ;     // 真正要被刪除並釋放記憶體的node
+    TreeNode *x ;     // 要被刪除的node的"child"
+    cout<<"x"<< x->key;
+    cout<<"y"<< y->key;
 
     if (delete_node->leftchild == neel || delete_node->rightchild == neel){
+      cout<<"H1"<<endl;
         y = delete_node;
     }
     else{
+      cout<<"H2"<<endl;
         y = Successor(delete_node);         // 將y設成delete_node的Successor
+        cout<<"y Successor"<< y->key;
     }                                       // 經過這組if-else, y調整成至多只有一個child
-
+    // cout<<"x"<< x->key;
+    // cout<<"y"<< y->key;
 
     if (y->leftchild != neel){              // 將x設成y的child, 可能有實際資料, 也有可能是NIL
         x = y->leftchild;
@@ -80,11 +129,17 @@ void RBT::DeleteRBT(int KEY){              // 要刪除具有KEY的node
         x = y->rightchild;
     }
 
+
     x->parent = y->parent;                 // 即使x是NIL也要把x的parent指向有效的記憶體位置
                                            // 因為在FixUp時需要藉由x->parent判斷x為leftchild或是rightchild
 
-    if (y->parent == neel){                // 接著再把要被釋放記憶體的node之"parent"指向新的child
-        this->root = x;                    // 若刪除的是原先的root, 就把x當成新的root
+    // if (y->parent == neel){                // 接著再把要被釋放記憶體的node之"parent"指向新的child
+    //     this->root = x;                    // 若刪除的是原先的root, 就把x當成新的root
+    // }
+    cout<<"Here!!!!!!!!";
+    if (y->parent == neel){                // 若刪除的是原先的root, 就把x當成新的root
+        if(x->key != Key(-1,-1)) this->root = x;
+        else this->root =  new TreeNode(Key(-1,-1));
     }
     else if (y == y->parent->leftchild){   // 若y原本是其parent之left child
         y->parent->leftchild = x;          // 便把x皆在y的parent的left child, 取代y
@@ -95,7 +150,7 @@ void RBT::DeleteRBT(int KEY){              // 要刪除具有KEY的node
 
     if (y != delete_node) {                // 針對case3
         delete_node->key = y->key;         // 若y是delete_node的替身, 最後要再將y的資料
-        delete_node->element = y->element; // 放回delete_node的記憶體位置, 並將y的記憶體位置釋放
+        // delete_node->element = y->element; // 放回delete_node的記憶體位置, 並將y的記憶體位置釋放
     }
 
     if (y->color == 1) {                   // 若刪除的node是黑色, 要從x進行修正, 以符合RBT的顏色規則
@@ -177,11 +232,11 @@ void RBT::DeleteFixedUpRBT(TreeNode *current){
     }
     current->color = 1;
 }
-void RBT::InsertRBT(int key, string str){
+void RBT::InsertRBT(Key key){
     // 前半部與 InsertBST()之邏輯完全相同, 僅僅需要修改 NULL <-> NIL
     TreeNode *y = neel;
     TreeNode *x = root;
-    TreeNode *insert_node = new TreeNode(key, str);
+    TreeNode *insert_node = new TreeNode(key);
 
     while (x != neel) {     // 把root初始化成neel, 這裡就可以用neel來做判斷
         y = x;
@@ -314,15 +369,16 @@ void RBT::RightRotation(TreeNode *y){
 }
 
 TreeNode* RBT::Leftmost(TreeNode *current){
-
+  cout<<"Leftmost???????????????????????????";
     while (current->leftchild != NULL){
         current = current->leftchild;
     }
     return current;
 }
 TreeNode* RBT::Successor(TreeNode *current){
-
+  cout<<"start Successor"<<endl;
     if (current->rightchild != NULL){
+      cout<<"current->rightchild != NULL"<<endl;
         return Leftmost(current->rightchild);
     }
 
@@ -335,7 +391,7 @@ TreeNode* RBT::Successor(TreeNode *current){
 
     return new_node;
 }
-TreeNode* RBT::Search(int KEY){
+TreeNode* RBT::Search(Key KEY){
 
     TreeNode *current = root;               // 將curent指向root作為traversal起點
 
@@ -350,16 +406,39 @@ TreeNode* RBT::Search(int KEY){
     }
     return current;
 }
-
+void RBT::Inorder(TreeNode *current){
+    if (current) {                          // if current != NULL
+        Inorder(current->leftchild);        // L
+        std::cout << current->key;   // V
+        Inorder(current->rightchild);       // R
+    }
+}
 
 int main(){
-  printf("Hello\n");
-  RBT mytree;
-  // void InsertRBT(int key, string str);
-  // void DeleteRBT(int KEY);
-  string str = "";
-  mytree.InsertRBT(1,str);
-  mytree.InsertRBT(2,str);
-  mytree.InsertRBT(3,str);
+  cout << "Hello" << endl;
+  RBT mytree(Key(-1,-1));
+  cout << "Hello?" << endl;
+  mytree.InsertRBT(Key(10,5));
+  mytree.InsertRBT(Key(8,2));
+  mytree.InsertRBT(Key(12,16));
+  mytree.InsertRBT(Key(7,16));
+  mytree.InsertRBT(Key(8.5,16));
+  mytree.Inorder(mytree.root);
+  cout << "Hello???" << endl;
+  mytree.DeleteRBT(Key(8,2));
+  cout<<endl;
+  mytree.Inorder(mytree.root);
+  mytree.DeleteRBT(Key(12,16));
+  cout<<endl;
+  mytree.Inorder(mytree.root);
+  mytree.DeleteRBT(Key(10,5));
+  cout<<endl;
+  mytree.Inorder(mytree.root);
+  mytree.DeleteRBT(Key(8.5,16));
+  cout<<endl;
+  mytree.Inorder(mytree.root);
+  mytree.DeleteRBT(Key(7,16));
+  cout<<endl;
+  mytree.Inorder(mytree.root);
   return 0;
 }
