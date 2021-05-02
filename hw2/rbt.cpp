@@ -2,6 +2,9 @@
 #include <string>
 #include <sstream>
 #include <vector>
+#include <stdlib.h>
+#include <list>
+
 using namespace std;
 
 class node;
@@ -81,7 +84,7 @@ class RBtree
       node *q;
       vector<ID_Value> sort_list;
       bool recursive_break_flag;
-      // bool modify_tree_flag;
+      int extend_lenght;
 
       RBtree()
       {
@@ -98,21 +101,32 @@ class RBtree
       void disp();
       void display( node *);
       void search(ID_Value x);
-      void Inorder(node *current, int rank);
-      void sort(int rank);
 
-      void r(int rank); //mode 1
-      void R(int rank); //mode 1
+      void Inorder(node *current, int rank);
+      void Inorder_v(node *current, float value);
+      void Inorder_K(node *current, float value, int num);
+      void sort(int rank);
+      void sort_v(float value);
+      void sort_K(float value, int num);
+
+      void r(int rank);
+      void R(int rank);
+      void v(float value);
+      void V(float value);
+      void K(float value, int num);
 };
 
 void RBtree::r(int rank){
   this->sort(rank);
+  vector<ID_Value> ans_list;
   ID_Value tmpppp = this->sort_list[ this->sort_list.size() -1 ];
+  ans_list.push_back(tmpppp);
   while (tmpppp.GetValue()==sort_list[ this->sort_list.size() -2 ].GetValue()){
     this->sort_list.pop_back();
     tmpppp = this->sort_list[ this->sort_list.size() -1 ];
+    ans_list.push_back(tmpppp);
   }
-  cout<<"r:"<<rank<<" "<<tmpppp<<endl;
+  cout<<"r:"<<rank<<" "<<ans_list[ans_list.size()-1]<<endl;
 }
 
 void RBtree::R(int rank){
@@ -125,16 +139,100 @@ void RBtree::R(int rank){
     tmpppp = this->sort_list[ this->sort_list.size() -1 ];
     ans_list.push_back(tmpppp);
   }
-  for(int i=0;i<ans_list.size();i++) cout<<"R:"<<rank<<" "<<ans_list[i]<<endl;
+  cout<<"R:"<<rank<<" "<<ans_list[0]<<endl;
 }
+void RBtree::v(float value){
+  this->sort_v(value);
+  cout<<"v:"<<value<<" "<<this->sort_list.size()<<endl;
+}
+void RBtree::V(float value){
+  this->sort_v(value);
+  int last = this->sort_list.size();
+  int first = last;
+  while (this->sort_list[first-1].GetValue() == value) {
+    first --;
+  }
+  first ++;
+  cout<<"V:"<<value<<" "<<first<<" "<<last<<endl;
+}
+void RBtree::K(float value, int num){
 
+  this->sort_K(value,num);
+  int ans_list[num];
+  int count = 0;
+  int left = this->sort_list.size()-1-num;
+  int right = this->sort_list.size()-num;
+  cout<<this->sort_list[left]<<endl;
+  cout<<this->sort_list[right]<<endl;
+
+  while(count<num){
+    float tmp1 = this->sort_list[left].GetValue();
+    float tmp2 = this->sort_list[right].GetValue();
+    cout<<"tmp1= "<<tmp1<<"tmp2= "<<tmp2<<endl;
+    if(abs(tmp1-value) < abs(tmp2-value)){
+      while(this->sort_list[left].GetValue() == tmp1) left --;
+      ans_list[count] = this->sort_list[left+1].GetID();
+    }else{
+      ans_list[count] = this->sort_list[right].GetID();
+      right ++;
+    }
+    count ++;
+  }
+  for(int i=0;i<count;i++) cout<<ans_list[i]<<" ";
+}
+void RBtree::sort_v(float value){
+  (this->sort_list).clear();
+  this -> recursive_break_flag = 0;
+  this -> Inorder_v(this->root, value);
+}
+void RBtree::Inorder_v(node *current, float value){
+  if(this -> recursive_break_flag) return;
+  if (current) {// if current != NULL
+    Inorder_v(current->right, value);
+
+
+    if (current->key.GetValue()>=value){
+      this -> sort_list.push_back(current->key);
+    }else{
+      this -> recursive_break_flag = 1;
+    }
+
+    Inorder_v(current->left, value);
+  }
+}
+void RBtree::sort_K(float value, int num){
+  (this->sort_list).clear();
+  this -> recursive_break_flag = 0;
+  this -> extend_lenght = 0;
+  this -> Inorder_K(this->root, value, num);
+  cout<<"sort_list:";
+  for(int i=0;i<(this->sort_list).size();i++) cout<< this->sort_list[i]<<endl;
+  cout<<"----"<<endl;
+}
+void RBtree::Inorder_K(node *current, float value, int num){
+  if(this -> recursive_break_flag) return;
+  if (current) {// if current != NULL
+    Inorder_K(current->right, value, num);
+
+
+    if (current->key.GetValue()>=value){
+      this -> sort_list.push_back(current->key);
+    }else{
+      this -> sort_list.push_back(current->key);
+      this -> extend_lenght ++;
+      if(this -> extend_lenght > num) this -> recursive_break_flag = 1;
+    }
+
+    Inorder_K(current->left, value, num);
+  }
+}
 void RBtree::sort(int rank){
   (this->sort_list).clear();
   this -> recursive_break_flag = 0;
   this -> Inorder(this->root, rank);
-  cout<<"sort_list:";
-  for(int i=0;i<(this->sort_list).size();i++) cout<< this->sort_list[i]<<endl;
-  cout<<"----"<<endl;
+  // cout<<"sort_list:";
+  // for(int i=0;i<(this->sort_list).size();i++) cout<< this->sort_list[i]<<endl;
+  // cout<<"----"<<endl;
   // recursive_break_flag = 0;
   // this -> modify_tree_flag = 0;
 }
@@ -146,8 +244,12 @@ void RBtree::Inorder(node *current, int rank){
     if ((this->sort_list).size()< rank ) {
       this -> sort_list.push_back(current->key);
     }else{
-      cout<<"this -> recursive_break_flag = 1;"<<(this->sort_list).size()<<endl;
-      this -> recursive_break_flag = 1;
+      if( current->key.GetValue() == this->sort_list[this->sort_list.size()-1].GetValue() ){
+        this -> sort_list.push_back(current->key);
+      }else{
+        // cout<<"this -> recursive_break_flag = 1;"<<(this->sort_list).size()<<endl;
+        this -> recursive_break_flag = 1;
+      }
     }
 
     Inorder(current->left, rank);
@@ -491,6 +593,7 @@ void RBtree::search(ID_Value x)
             }
      }
 }
+
 int main()
 {
     RBtree obj;
@@ -499,13 +602,20 @@ int main()
     obj.insert(ID_Value(16, 12.5));
     obj.insert(ID_Value(11, 4.1));
     obj.insert(ID_Value(4, 4.1));
-    obj.insert(ID_Value(3, 4.1));
-    obj.insert(ID_Value(5, 4.1));
-    // obj.disp();
-    // obj.sort(2);
-    obj.R(1);
-    obj.R(2);
-    obj.R(3);
+    obj.r(4);
+    obj.del(ID_Value(16, 12.5));
     obj.R(4);
+    obj.insert(ID_Value(6, 15.9));
+    obj.insert(ID_Value(7, 0.1));
+
+    obj.v(0.1);
+    obj.V(4.1);
+    obj.V(8.6);
+
+    obj.insert(ID_Value(16, 4.1));
+    obj.insert(ID_Value(17, 4.1));
+    obj.insert(ID_Value(18, 8.6));
+    obj.K(4.5, 5);
+
     return 0;
 }
