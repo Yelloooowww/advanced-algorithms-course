@@ -2,11 +2,16 @@
 #include <string>
 #include <sstream>
 #include <vector>
-#include <stdlib.h>
+// #include <stdlib.h>
 #include <list>
 #include <cstdlib>
 #include <fstream>
 using namespace std;
+
+float MYabs(float a){
+  if(a>=0) return a;
+  else return -a;
+}
 
 class node;
 class RBtree;
@@ -166,7 +171,7 @@ void RBtree::K(float value, int num){
   while(count<num){
     float tmp1 = this->sort_list[left].GetValue();
     float tmp2 = this->sort_list[right].GetValue();
-    if(abs(tmp1-value) < abs(tmp2-value)){
+    if(MYabs(tmp1-value) < MYabs(tmp2-value)){
       while(this->sort_list[left].GetValue() == tmp1) left --;
       ans_list[count] = this->sort_list[left+1].GetID();
     }else{
